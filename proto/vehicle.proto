@@ -17,6 +17,7 @@ message Model {
 // Services
 service VehicleService {
   rpc GetVehicles(GetVehiclesRequest) returns (GetVehiclesResponse);
+  rpc StreamVehicles(GetVehiclesRequest) returns (stream StreamVehiclesResponse);
 }
 
 // Payloads
@@ -24,4 +25,8 @@ message GetVehiclesRequest {}
 
 message GetVehiclesResponse {
   repeated Vehicle vehicles = 1;
+}
+
+message StreamVehiclesResponse {
+  Vehicle vehicle = 1;
 }

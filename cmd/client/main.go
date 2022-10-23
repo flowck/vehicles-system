@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"io"
 	"log"
-	"time"
 	pb "vehicles-system/api"
 )
 
@@ -27,7 +27,7 @@ func main() {
 	defer conn.Close()
 	service := pb.NewVehicleServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var data *pb.GetVehiclesResponse
@@ -36,4 +36,21 @@ func main() {
 	}
 
 	printGetVehiclesResponse(data)
+
+	var stream pb.VehicleService_StreamVehiclesClient
+	stream, err = service.StreamVehicles(ctx, &pb.GetVehiclesRequest{})
+
+	for {
+		result, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("End of stream")
+			return
+		}
+
+		if err != nil {
+			log.Fatalf("An error ocurred during stream: %v", err)
+		}
+
+		fmt.Printf("id: %s | name: %s\n", result.Vehicle.Id, result.Vehicle.Name)
+	}
 }

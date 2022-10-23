@@ -2,6 +2,7 @@ package grpc_service
 
 import (
 	"context"
+	"time"
 	pb "vehicles-system/api"
 	"vehicles-system/internal/app"
 	"vehicles-system/internal/domain/vehicle"
@@ -19,6 +20,20 @@ func (s vehicleService) GetVehicles(ctx context.Context, req *pb.GetVehiclesRequ
 	}
 
 	return &pb.GetVehiclesResponse{Vehicles: mapToRpcVehicles(vehicles)}, nil
+}
+
+func (s vehicleService) StreamVehicles(req *pb.GetVehiclesRequest, stream pb.VehicleService_StreamVehiclesServer) error {
+	vehicles, err := s.application.VehicleService.GetVehicles(stream.Context())
+	if err != nil {
+		return nil
+	}
+
+	for _, item := range vehicles {
+		stream.Send(&pb.StreamVehiclesResponse{Vehicle: mapToRpcVehicle(item)})
+		time.Sleep(time.Millisecond * 500) // Not so fast dude
+	}
+
+	return nil
 }
 
 // Helpers

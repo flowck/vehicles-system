@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VehicleServiceClient interface {
 	GetVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (*GetVehiclesResponse, error)
+	StreamVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (VehicleService_StreamVehiclesClient, error)
 }
 
 type vehicleServiceClient struct {
@@ -42,11 +43,44 @@ func (c *vehicleServiceClient) GetVehicles(ctx context.Context, in *GetVehiclesR
 	return out, nil
 }
 
+func (c *vehicleServiceClient) StreamVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (VehicleService_StreamVehiclesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &VehicleService_ServiceDesc.Streams[0], "/vehicle.VehicleService/StreamVehicles", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &vehicleServiceStreamVehiclesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type VehicleService_StreamVehiclesClient interface {
+	Recv() (*StreamVehiclesResponse, error)
+	grpc.ClientStream
+}
+
+type vehicleServiceStreamVehiclesClient struct {
+	grpc.ClientStream
+}
+
+func (x *vehicleServiceStreamVehiclesClient) Recv() (*StreamVehiclesResponse, error) {
+	m := new(StreamVehiclesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // VehicleServiceServer is the server API for VehicleService service.
 // All implementations must embed UnimplementedVehicleServiceServer
 // for forward compatibility
 type VehicleServiceServer interface {
 	GetVehicles(context.Context, *GetVehiclesRequest) (*GetVehiclesResponse, error)
+	StreamVehicles(*GetVehiclesRequest, VehicleService_StreamVehiclesServer) error
 	mustEmbedUnimplementedVehicleServiceServer()
 }
 
@@ -56,6 +90,9 @@ type UnimplementedVehicleServiceServer struct {
 
 func (UnimplementedVehicleServiceServer) GetVehicles(context.Context, *GetVehiclesRequest) (*GetVehiclesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVehicles not implemented")
+}
+func (UnimplementedVehicleServiceServer) StreamVehicles(*GetVehiclesRequest, VehicleService_StreamVehiclesServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamVehicles not implemented")
 }
 func (UnimplementedVehicleServiceServer) mustEmbedUnimplementedVehicleServiceServer() {}
 
@@ -88,6 +125,27 @@ func _VehicleService_GetVehicles_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VehicleService_StreamVehicles_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetVehiclesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(VehicleServiceServer).StreamVehicles(m, &vehicleServiceStreamVehiclesServer{stream})
+}
+
+type VehicleService_StreamVehiclesServer interface {
+	Send(*StreamVehiclesResponse) error
+	grpc.ServerStream
+}
+
+type vehicleServiceStreamVehiclesServer struct {
+	grpc.ServerStream
+}
+
+func (x *vehicleServiceStreamVehiclesServer) Send(m *StreamVehiclesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // VehicleService_ServiceDesc is the grpc.ServiceDesc for VehicleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -100,6 +158,12 @@ var VehicleService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _VehicleService_GetVehicles_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamVehicles",
+			Handler:       _VehicleService_StreamVehicles_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "vehicle.proto",
 }

@@ -9,9 +9,9 @@ and for this reason they've contacted a consultancy to implement such system wit
 
 ### Functional requirements
 
-- A system must be able to get at once the full list of vehicle brands available
+- ~~A system must be able to get at once the full list of vehicle brands available~~
 - A system must be able to get one brand and its models
-- A system must be able to get a stream of models of a specific brand
+- ~~A system must be able to stream vehicles from the vehicles system~~ 
 - A system must be able to create a new brand
 - A system must be able to stream models into a brand in the `Vehicles System`
 
