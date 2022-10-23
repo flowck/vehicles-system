@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "vehicles-system/api";
+package vehicle;
+
+// Messages
+message Vehicle {
+  string id = 1;
+  string name = 2;
+  repeated Model models = 3;
+}
+
+message Model {
+  string name = 1;
+}
+
+// Services
+service VehicleService {
+  rpc GetVehicles(GetVehiclesRequest) returns (GetVehiclesResponse);
+}
+
+// Payloads
+message GetVehiclesRequest {}
+
+message GetVehiclesResponse {
+  repeated Vehicle vehicles = 1;
+}
