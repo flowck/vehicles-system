@@ -13,7 +13,7 @@ type vehicleService struct {
 }
 
 func (s vehicleService) GetVehicles(ctx context.Context, req *pb.GetVehiclesRequest) (*pb.GetVehiclesResponse, error) {
-	vehicles, err := s.application.VehicleService.GetVehicles()
+	vehicles, err := s.application.VehicleService.GetVehicles(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -10,8 +10,14 @@ import (
 	pb "vehicles-system/api"
 )
 
+func printGetVehiclesResponse(data *pb.GetVehiclesResponse) {
+	for idx, item := range data.Vehicles {
+		fmt.Printf("%d - id: %s | name: %s\n", idx, item.Id, item.Name)
+	}
+}
+
 func main() {
-	fmt.Println("Simple client for testing")
+	fmt.Println("Simple client for testing stuff")
 
 	// Connect to the server
 	conn, err := grpc.Dial("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -21,14 +27,13 @@ func main() {
 	defer conn.Close()
 	service := pb.NewVehicleServiceClient(conn)
 
-	//
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	data, err := service.GetVehicles(ctx, &pb.GetVehiclesRequest{})
-	if err != nil {
+	var data *pb.GetVehiclesResponse
+	if data, err = service.GetVehicles(ctx, &pb.GetVehiclesRequest{}); err != nil {
 		log.Fatalf("Could not get vehicles: %v", err)
 	}
 
-	log.Println(data)
+	printGetVehiclesResponse(data)
 }
