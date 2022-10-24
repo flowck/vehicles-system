@@ -3,13 +3,13 @@ This is supposed to be a mock repository that implements the interface vehicle.R
 later. ;)
 */
 
-package adapter
+package adapters
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"vehicles-system/internal/domain/vehicle"
 )
@@ -23,26 +23,20 @@ type mockVehicle struct {
 	Models []string `json:"models"`
 }
 
+//go:embed vehicles_mock.json
+var vehiclesRawData []byte
+
 func NewMockDataVehicleRepository() (mockDataVehicleRepository, error) {
-	workdir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	
-	file, err := os.ReadFile(fmt.Sprintf("%s/internal/adapter/cars.json", workdir))
-
-	if err != nil {
-		panic(err)
-	}
-
 	var mockData []mockVehicle
-	if err = json.Unmarshal(file, &mockData); err != nil {
+
+	if err := json.Unmarshal(vehiclesRawData, &mockData); err != nil {
 		panic(err)
 	}
 
 	data := make([]vehicle.Vehicle, len(mockData))
 	// Map mock data
 	for idx, item := range mockData {
+
 		v, err := vehicle.NewVehicle(fmt.Sprintf("%s-%d", strings.ToLower(item.Brand), idx), item.Brand, item.Models)
 		if err != nil {
 			return mockDataVehicleRepository{}, err
