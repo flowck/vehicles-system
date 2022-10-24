@@ -1,0 +1,17 @@
+name: ci
+on:
+  push
+
+jobs:
+  tests:
+    name: build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/setup-task@v1
+        with:
+          version: 3.10.0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '~1.18'
+      - run: task build:all
