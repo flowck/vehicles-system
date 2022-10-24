@@ -22,6 +22,15 @@ func (s vehicleService) GetVehicles(ctx context.Context, req *pb.GetVehiclesRequ
 	return &pb.GetVehiclesResponse{Vehicles: mapToRpcVehicles(vehicles)}, nil
 }
 
+func (s vehicleService) GetVehicle(ctx context.Context, req *pb.GetVehicleRequest) (*pb.GetVehicleResponse, error) {
+	result, err := s.application.VehicleService.GetVehicle(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetVehicleResponse{Vehicle: mapToRpcVehicle(result)}, nil
+}
+
 func (s vehicleService) StreamVehicles(req *pb.GetVehiclesRequest, stream pb.VehicleService_StreamVehiclesServer) error {
 	vehicles, err := s.application.VehicleService.GetVehicles(stream.Context())
 	if err != nil {
@@ -29,7 +38,7 @@ func (s vehicleService) StreamVehicles(req *pb.GetVehiclesRequest, stream pb.Veh
 	}
 
 	for _, item := range vehicles {
-		stream.Send(&pb.StreamVehiclesResponse{Vehicle: mapToRpcVehicle(item)})
+		stream.Send(&pb.StreamVehiclesResponse{Vehicle: mapToRpcVehicle(&item)})
 		time.Sleep(time.Millisecond * 500) // Not so fast dude
 	}
 
@@ -51,7 +60,7 @@ func mapToRpcModels(models []string) []*pb.Model {
 	return result
 }
 
-func mapToRpcVehicle(item vehicle.Vehicle) *pb.Vehicle {
+func mapToRpcVehicle(item *vehicle.Vehicle) *pb.Vehicle {
 	return &pb.Vehicle{
 		Id:     item.Id(),
 		Name:   item.Name(),
@@ -63,7 +72,7 @@ func mapToRpcVehicles(vehicles []vehicle.Vehicle) []*pb.Vehicle {
 	result := make([]*pb.Vehicle, len(vehicles))
 
 	for idx, item := range vehicles {
-		result[idx] = mapToRpcVehicle(item)
+		result[idx] = mapToRpcVehicle(&item)
 	}
 
 	return result

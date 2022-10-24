@@ -30,18 +30,26 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var data *pb.GetVehiclesResponse
-	if data, err = service.GetVehicles(ctx, &pb.GetVehiclesRequest{}); err != nil {
+	// Get all vehicles
+	var allVehicles *pb.GetVehiclesResponse
+	if allVehicles, err = service.GetVehicles(ctx, &pb.GetVehiclesRequest{}); err != nil {
 		log.Fatalf("Could not get vehicles: %v", err)
 	}
+	printGetVehiclesResponse(allVehicles)
 
-	printGetVehiclesResponse(data)
+	// Get a vehicle by id
+	var singleVehicle *pb.GetVehicleResponse
+	if singleVehicle, err = service.GetVehicle(ctx, &pb.GetVehicleRequest{Id: allVehicles.Vehicles[2].GetId()}); err != nil {
+		log.Fatalf("Could not get a single vehicle: %v", err)
+	}
+	fmt.Printf("Single vehicle", singleVehicle)
 
-	var stream pb.VehicleService_StreamVehiclesClient
-	stream, err = service.StreamVehicles(ctx, &pb.GetVehiclesRequest{})
+	// Get a stream of all vehicles
+	var streamAllVehicles pb.VehicleService_StreamVehiclesClient
+	streamAllVehicles, err = service.StreamVehicles(ctx, &pb.GetVehiclesRequest{})
 
 	for {
-		result, err := stream.Recv()
+		result, err := streamAllVehicles.Recv()
 		if err == io.EOF {
 			log.Println("End of stream")
 			return

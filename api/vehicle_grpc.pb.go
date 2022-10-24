@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VehicleServiceClient interface {
 	GetVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (*GetVehiclesResponse, error)
+	GetVehicle(ctx context.Context, in *GetVehicleRequest, opts ...grpc.CallOption) (*GetVehicleResponse, error)
 	StreamVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (VehicleService_StreamVehiclesClient, error)
 }
 
@@ -37,6 +38,15 @@ func NewVehicleServiceClient(cc grpc.ClientConnInterface) VehicleServiceClient {
 func (c *vehicleServiceClient) GetVehicles(ctx context.Context, in *GetVehiclesRequest, opts ...grpc.CallOption) (*GetVehiclesResponse, error) {
 	out := new(GetVehiclesResponse)
 	err := c.cc.Invoke(ctx, "/vehicle.VehicleService/GetVehicles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vehicleServiceClient) GetVehicle(ctx context.Context, in *GetVehicleRequest, opts ...grpc.CallOption) (*GetVehicleResponse, error) {
+	out := new(GetVehicleResponse)
+	err := c.cc.Invoke(ctx, "/vehicle.VehicleService/GetVehicle", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +90,7 @@ func (x *vehicleServiceStreamVehiclesClient) Recv() (*StreamVehiclesResponse, er
 // for forward compatibility
 type VehicleServiceServer interface {
 	GetVehicles(context.Context, *GetVehiclesRequest) (*GetVehiclesResponse, error)
+	GetVehicle(context.Context, *GetVehicleRequest) (*GetVehicleResponse, error)
 	StreamVehicles(*GetVehiclesRequest, VehicleService_StreamVehiclesServer) error
 	mustEmbedUnimplementedVehicleServiceServer()
 }
@@ -90,6 +101,9 @@ type UnimplementedVehicleServiceServer struct {
 
 func (UnimplementedVehicleServiceServer) GetVehicles(context.Context, *GetVehiclesRequest) (*GetVehiclesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVehicles not implemented")
+}
+func (UnimplementedVehicleServiceServer) GetVehicle(context.Context, *GetVehicleRequest) (*GetVehicleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVehicle not implemented")
 }
 func (UnimplementedVehicleServiceServer) StreamVehicles(*GetVehiclesRequest, VehicleService_StreamVehiclesServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamVehicles not implemented")
@@ -125,6 +139,24 @@ func _VehicleService_GetVehicles_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VehicleService_GetVehicle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVehicleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VehicleServiceServer).GetVehicle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vehicle.VehicleService/GetVehicle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VehicleServiceServer).GetVehicle(ctx, req.(*GetVehicleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VehicleService_StreamVehicles_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetVehiclesRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -156,6 +188,10 @@ var VehicleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVehicles",
 			Handler:    _VehicleService_GetVehicles_Handler,
+		},
+		{
+			MethodName: "GetVehicle",
+			Handler:    _VehicleService_GetVehicle_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

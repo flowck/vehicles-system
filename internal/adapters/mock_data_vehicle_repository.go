@@ -49,6 +49,13 @@ func NewMockDataVehicleRepository() (mockDataVehicleRepository, error) {
 }
 
 func (r mockDataVehicleRepository) Find(ctx context.Context, id string) (*vehicle.Vehicle, error) {
+	// O(n)
+	for _, row := range r.data {
+		if row.Id() == id {
+			return &row, nil
+		}
+	}
+
 	return nil, nil
 }
 
