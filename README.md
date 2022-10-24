@@ -1,5 +1,7 @@
 # Vehicles System (grpc)
 
+[![ci](https://github.com/flowck/vehicles-system/actions/workflows/ci.yml/badge.svg)](https://github.com/flowck/vehicles-system/actions/workflows/ci.yml)
+
 ## Setup
 
 ## Project description
