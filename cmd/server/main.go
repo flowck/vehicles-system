@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 	"vehicles-system/internal/app"
-	"vehicles-system/internal/port/grpc_service"
+	"vehicles-system/internal/ports/grpc_service"
 )
 
 func main() {
