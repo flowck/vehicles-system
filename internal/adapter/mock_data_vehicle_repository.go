@@ -23,12 +23,12 @@ type mockVehicle struct {
 	Models []string `json:"models"`
 }
 
-func NewMockDataVehicleRepository() mockDataVehicleRepository {
+func NewMockDataVehicleRepository() (mockDataVehicleRepository, error) {
 	workdir, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-
+	
 	file, err := os.ReadFile(fmt.Sprintf("%s/internal/adapter/cars.json", workdir))
 
 	if err != nil {
@@ -43,14 +43,15 @@ func NewMockDataVehicleRepository() mockDataVehicleRepository {
 	data := make([]vehicle.Vehicle, len(mockData))
 	// Map mock data
 	for idx, item := range mockData {
-		data[idx] = vehicle.Vehicle{
-			Id:     fmt.Sprintf("%s-%d", strings.ToLower(item.Brand), idx),
-			Name:   item.Brand,
-			Models: item.Models,
+		v, err := vehicle.NewVehicle(fmt.Sprintf("%s-%d", strings.ToLower(item.Brand), idx), item.Brand, item.Models)
+		if err != nil {
+			return mockDataVehicleRepository{}, err
 		}
+
+		data[idx] = v
 	}
 
-	return mockDataVehicleRepository{data}
+	return mockDataVehicleRepository{data}, nil
 }
 
 func (r mockDataVehicleRepository) Find(ctx context.Context, id string) (*vehicle.Vehicle, error) {

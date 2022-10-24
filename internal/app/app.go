@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"vehicles-system/internal/adapter"
 	"vehicles-system/internal/domain/vehicle"
 )
@@ -10,7 +11,11 @@ type App struct {
 }
 
 func NewApp() *App {
-	vehicleRepository := adapter.NewMockDataVehicleRepository()
+	vehicleRepository, err := adapter.NewMockDataVehicleRepository()
+	if err != nil {
+		panic(fmt.Sprintf("cannot create repository vehicleRepository: %v", err))
+	}
+
 	vehicleService := vehicle.NewService(vehicleRepository)
 
 	return &App{VehicleService: vehicleService}

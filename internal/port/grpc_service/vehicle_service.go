@@ -53,9 +53,9 @@ func mapToRpcModels(models []string) []*pb.Model {
 
 func mapToRpcVehicle(item vehicle.Vehicle) *pb.Vehicle {
 	return &pb.Vehicle{
-		Id:     item.Id,
-		Name:   item.Name,
-		Models: mapToRpcModels(item.Models),
+		Id:     item.Id(),
+		Name:   item.Name(),
+		Models: mapToRpcModels(item.Models()),
 	}
 }
 
