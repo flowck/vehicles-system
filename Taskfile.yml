@@ -21,3 +21,7 @@ tasks:
     cmds:
       - task build:server
       - task build:client
+
+  docker:build:
+    cmds:
+      - docker build -t vehicles_system_server .
